@@ -203,7 +203,6 @@ return qty;
 
 /* SAVE */
 function saveStock(){
-let history=JSON.parse(localStorage.getItem("history")||"[]");
 let items=data[currentCategory][currentCompany];
 
 items.forEach((item,i)=>{
@@ -212,18 +211,19 @@ let unit=document.getElementById("unit"+i).value;
 
 if(qty){
 let baseQty=convertToBase(parseFloat(qty),unit,item.unit);
-history.push({
-date:new Date().toLocaleString(),
+
+let record = {
 staff: currentUser,
-category:currentCategory,
-company:currentCompany,
-item:item.name,
-qty:baseQty
-});
+category: currentCategory,
+company: currentCompany,
+item: item.name,
+qty: baseQty
+};
+
+sendToGoogleSheet(record);
 }
 });
 
-localStorage.setItem("history",JSON.stringify(history));
 alert("Saved");
 goHome();
 }
@@ -256,6 +256,17 @@ function clearHistory(){
 if(confirm("ต้องการล้างประวัติทั้งหมดใช่หรือไม่?")){
 localStorage.removeItem("history");
 loadHistory();
+}
+    function sendToGoogleSheet(data){
+fetch("https://script.google.com/macros/s/AKfycbwcNFxfKtGlsmngjp1CSqIUj_MF6XBDmPQVFXShwWB6I4qtI00zTyplOsjjMLXMbs7uAg/exec", {
+method: "POST",
+body: JSON.stringify(data),
+headers: {
+"Content-Type": "application/json"
+}
+})
+.then(res => res.json())
+.then(res => console.log(res));
 }
 }
 </script>
